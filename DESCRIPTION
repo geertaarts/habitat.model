@@ -3,7 +3,7 @@ Version: 0.0.1
 Date: 2019-11-09
 Title: Habitat Modelling tracking data
 Author: Geert Aarts & Rob van Bemmelen
-Maintainer: 
+Maintainer: Geert Aarts <geert_aarts@hotmail.com.
 Depends:
     R (>= 3.1.0)
 Imports:
