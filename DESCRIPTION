@@ -1,7 +1,7 @@
 Package: habitat.model
-Version: 0.0.0
-Date: 2014-04-18
-Title: A Minimal R Package as an Example of Writing R Packages
+Version: 0.0.1
+Date: 2019-11-09
+Title: Habitat Modelling tracking data
 Author: Geert Aarts & Rob van Bemmelen
 Maintainer: 
 Depends:
@@ -9,7 +9,6 @@ Depends:
 Imports:
     tools
 Suggests:
-    sp
     knitr
 Description: An R package containing R functions for doing habitat analysis of tracking data
 License: GPL
