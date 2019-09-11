@@ -1,19 +1,18 @@
-Package: rmini
-Version: 0.0.4
+Package: habitat.model
+Version: 0.0.0
 Date: 2014-04-18
 Title: A Minimal R Package as an Example of Writing R Packages
-Author: Yihui Xie
-Maintainer: Yihui Xie <xie@yihui.name>
+Author: Geert Aarts & Rob van Bemmelen
+Maintainer: 
 Depends:
     R (>= 3.1.0)
 Imports:
     tools
 Suggests:
-    roxygen2,
+    sp
     knitr
-Description: A minimal R package that shows you how to write R packages with
-    roxygen documentation, S3 methods, vignettes, tests, and C code, etc.
+Description: An R package containing R functions for doing habitat analysis of tracking data
 License: GPL
-URL: https://github.com/yihui/rmini
-BugReports: https://github.com/yihui/rmini/issues
+URL: https://github.com/geertaarts/habitat.model
+BugReports: https://github.com/geertaarts/habitat.model/issues
 VignetteBuilder: knitr
