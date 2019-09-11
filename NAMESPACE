@@ -1,6 +1,7 @@
 S3method("+",Foo)
 S3method(hello,character)
 S3method(hello,default)
+S3method(xy.project.na,default)
 export(hello)
 export(xy.project.na)
 export(reverse)
