@@ -1,4 +1,4 @@
-xy.project.NA<-function(dataframe,CRSold,CRSnew,xold,yold,xnew,ynew)
+xy.project.na<-function(dataframe,CRSold,CRSnew,xold,yold,xnew,ynew)
 {
   require(sp)
   xy<-data.frame(dataframe[,xold],dataframe[,yold])
