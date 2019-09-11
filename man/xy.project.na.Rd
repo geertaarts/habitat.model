@@ -22,7 +22,7 @@ Function to change projection of a data.frame
 }
 \examples{
 d<-data.frame(lon=c(3,4,NA,5),lat=c(51,NA,52,53))
-xy.project.NA(dataframe=d,
+xy.project.na(dataframe=d,
               CRSold="+proj=longlat +datum=WGS84",
               CRSnew="+proj=utm +zone=31 +ellps=WGS84 +datum=WGS84 +units=m +no_defs +towgs84=0,0,0",
               xold="lon",yold="lat",xnew="xutm",ynew="yutm")
