@@ -33,5 +33,5 @@ utmmap <- function(study.area=NULL, incl.ncp=FALSE, ...) {
   plot(coast, col='lightgrey', border='lightgrey', xlim=xlim, ylim=ylim, ...)
   if (incl.ncp==TRUE) { plot(ncp.utm, border='lightgrey', add=TRUE) }
   box()
-  par(mar=rep(4,4,2,2))
+  par(mar=c(4,4,2,2))
 }
