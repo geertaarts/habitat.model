@@ -8,26 +8,40 @@ utmmap <- function(study.area=NULL, incl.ncp=FALSE, ...) {
     load('data/NCP.rdata')
   }
   
-  if (study.area=='VD' | is.null(study.area)) { # Voordelta
-    xlim=c(435282.8, 628135.7)
-    ylim=c(5650715, 5905695)
+  # study area can be defined as a abbreviation of an area: Voordelta, Netherlands, North Sea, NCP, Waddensea
+  # alternatively, one can provide the bbox of a spatial object, or a list containing xlim and ylim, respectively
+  if ( !is.null(study.area) ) {
+    if (study.area=='VD' | is.null(study.area)) { # Voordelta
+      xlim=c(435282.8, 628135.7)
+      ylim=c(5650715, 5905695)
+    }
+    if (study.area=='NL'){ # Netherlands (and Belgium)
+      xlim <- c(514953.5, 680000)
+      ylim <- c(5689000, 5930000)
+    }
+    if (study.area=='NS'){ # North Sea
+      xlim <- c(0, 680000)
+      ylim <- c(5689000,  6000000)
+    }
+    if (study.area=='NCP'){ # Dutch Continenal Shelf
+      xlim <- c(464167,  744405.2) ## change!
+      ylim <- c(5691582,  6179910) ## change!
+    }
+    if (study.area=='WS') { # Waddensea
+      xlim <- c(608000, 793000)
+      ylim <- c(5850000, 5938000 )
+    }
+  } else {
+    if ( dim(study.area)==c(2,2)) {
+      xlim <- study.area[1,]
+      ylim <- study.area[2,]
+    } 
+    if ( is.list(study.area) ) {
+      xlim <- study.area[[1]]
+      ylim <- study.area[[2]]
+    }
   }
-  if (study.area=='NL'){ # Netherlands (and Belgium)
-    xlim <- c(514953.5, 680000)
-    ylim <- c(5689000, 5930000)
-  }
-  if (study.area=='NS'){ # North Sea
-    xlim <- c(0, 680000)
-    ylim <- c(5689000,  6000000)
-  }
-  if (study.area=='NCP'){ # Dutch Continenal Shelf
-    xlim <- c(464167,  744405.2) ## change!
-    ylim <- c(5691582,  6179910) ## change!
-  }
-  if (study.area=='WS') { # Waddensea
-    xlim <- c(608000, 793000)
-    ylim <- c(5850000, 5938000 )
-  }
+
   
   par(mar=rep(1,4))
   plot(coast, col='lightgrey', border='lightgrey', xlim=xlim, ylim=ylim, ...)
