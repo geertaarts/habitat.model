@@ -31,7 +31,6 @@ utmmap <- function(study.area=NULL, incl.ncp=FALSE, ...) {
       xlim <- c(608000, 793000)
       ylim <- c(5850000, 5938000 )
     }
-  } else {
     if ( dim(study.area)==c(2,2)) {
       xlim <- study.area[1,]
       ylim <- study.area[2,]
@@ -40,7 +39,7 @@ utmmap <- function(study.area=NULL, incl.ncp=FALSE, ...) {
       xlim <- study.area[[1]]
       ylim <- study.area[[2]]
     }
-  }
+  } else { cat('Please provide study area borders.\n') }
 
   
   par(mar=rep(1,4))
