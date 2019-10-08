@@ -10,11 +10,11 @@ dist.to.col <- function(gr, # grid, as spatial object
   require(igraph)
   require(raster)
   
-  # gr is grid; this can have an irregular shape or holes
+  # gr is grid of class spatialPoints ; this can have an irregular shape or holes
   # col is colony/haulout location: must be one location!
 
   # check if all are in the same coordinate system...
-  if (proj4string(gr)!=proj4string(site)) {
+  if ( proj4string(gr)!=proj4string(site) ) {
     cat('Error: please provide all input to the same CRS.\n')
     break()
   }
