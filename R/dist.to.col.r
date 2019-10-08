@@ -4,32 +4,24 @@
 
 dist.to.col <- function(gr, # grid, as spatial object
                         site, # colony location, as spatial object
-                        trk, # tracking data, also as spatial object
                         plot=FALSE) {
   require(spdep)
   require(sp)
   require(igraph)
   require(raster)
   
-  # gr is grid
+  # gr is grid; this can have an irregular shape or holes
   # col is colony/haulout location: must be one location!
-  # tracking data for animals from this colony/haulout
-  
-  #gr <- create.grid(x=ncp.utm, cellsize=10000)
-  #site <- col.utm[col.utm@data$colony=='Scheelhoek',]
-  #trk <- st.xy
-  
+
   # check if all are in the same coordinate system...
-  if (!all(sapply(list(proj4string(gr), proj4string(site), proj4string(trk)), function(x) { x ==  proj4string(gr)}))) {
+  if (proj4string(gr)!=proj4string(site)) {
     cat('Error: please provide all input to the same CRS.\n')
     break()
   }
   
+  # node coordinates
   nodes <- as.data.frame(coordinates(gr))
-  
-  # first get shortest distance from colony (on land) to sea: the closest point on the grid
-  startpoint <- gr[unname(apply(rgeos::gDistance(gr, site, byid=TRUE), 1, which.min)),]
-  
+
   # k nearest neighbours
   near <- spdep::knearneigh(x=gr, k=36, longlat = NULL, RANN=TRUE)
   
