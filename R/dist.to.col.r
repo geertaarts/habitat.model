@@ -2,21 +2,14 @@
 ### function to calculate the distance over-sea to a colony or haulout
 ### based on https://github.com/geertaarts/seal_habitat/blob/master/seal_book/_05-Calculate_distance.Rmd
 
-#st.xy <- st
-#coordinates(st.xy) <- XY
-#proj4string(st.xy) <- my.proj$UTM31
-
-# 
-#
-#
-
 dist.to.col <- function(gr, # grid, as spatial object
                         site, # colony location, as spatial object
-                        trk # tracking data, also as spatial object
-                        ) {
+                        trk, # tracking data, also as spatial object
+                        plot=FALSE) {
   require(spdep)
   require(sp)
   require(igraph)
+  require(raster)
   
   # gr is grid
   # col is colony/haulout location: must be one location!
@@ -25,6 +18,12 @@ dist.to.col <- function(gr, # grid, as spatial object
   #gr <- create.grid(x=ncp.utm, cellsize=10000)
   #site <- col.utm[col.utm@data$colony=='Scheelhoek',]
   #trk <- st.xy
+  
+  # check if all are in the same coordinate system...
+  if (!all(sapply(list(proj4string(gr), proj4string(site), proj4string(trk)), function(x) { x ==  proj4string(gr)}))) {
+    cat('Error: please provide all input to the same CRS.\n')
+    break()
+  }
   
   nodes <- as.data.frame(coordinates(gr))
   
@@ -41,71 +40,54 @@ dist.to.col <- function(gr, # grid, as spatial object
   # Create network graph    
   netwrk <- igraph::graph.data.frame(links, directed=FALSE)
  
+  # which node is closest to the colony location?
+  first.node <- which.min(raster::pointDistance(p1=site, p2=nodes, lonlat=FALSE))
+
   # Calculate shortest paths
   dists <- igraph::shortest.paths(netwrk,
-                                 v=as.character(nrow(nodes)), # CORRECT?
+                                 v=as.character(first.node), # CORRECT?
                                  weights=igraph::E(netwrk)$newcost)  
   
   # quick plot
-  dev.new()
-  utmmap('NCP', TRUE)
-  #points(gr, pch="+")
-  points(site, pch=16, col=2)
-  points(gr, 
-         col=rainbow(100)[round((dists-min(dists))/(max(dists)-min(dists)),2)*100], 
-         pch=16)
-  
-  
-  return()
-  
+  if ( plot==TRUE ) {
+      dev.new()
+      utmmap('NCP', TRUE)
+      #points(gr, pch="+")
+      points(gr, 
+             col=rainbow(100)[round((dists-min(dists))/(max(dists)-min(dists)),2)*100], 
+             pch=16)
+      points(site, pch='*', col=1, cex=3)
+  }
+  return(dists)
 }
 
 
-# Create network graph  
-g2 <- graph.data.frame(links, directed=FALSE)
+### another way to do it. Avoid crossing over-land
+#library(gdistance)
+#pC.atsea <- st.xy[is.na(over(st.xy, coast)[,1]),]
+#pC <- coordinates(st.xy)
+#pC.atsea <- pC.atsea[is.na(over(pC.atsea, gr0)[,1]),]
 
-# Calculate shortest paths
-tmp3 <- shortest.paths(g2,v='85000',weights=E(g2)$newcost) # change v to the gr200 or gr1000 locations were the haulout is located
-tmp3 <- shortest.paths(g2,v='10',weights=E(g2)$newcost)  
-tmp3[tmp3>100000]<-100000
-kleur<-rainbow(120)[round(tmp3/max(tmp3)*100)+1]
-plot(nodes$x,nodes$y,col=kleur,pch=20,lwd=2)
+#huh <- raster::extract(gr0, pC.atsea)
 
+#plot(pC.atsea[huh==0 & !is.na(huh),]) # on land
+#plot(pC.atsea[huh==1 & !is.na(huh),]) # at sea
 
-### voorbeeldcode Geert
+#pC.atsea <- pC.atsea[!is.na(huh) & huh==1,]
 
+#gr.st.rs <- raster(x=gr.st[,1], y=gr.st[,2], z=NA)
 
-# example nodes
-ndim=round(sqrt(10000))
-npoints=ndim^2
-nodes<-expand.grid(x=1:ndim,y=1:ndim)
-# remove some parts
-nodes <- nodes[sample(x=1:nrow(nodes), size=1000),]
+#geoDist <- pointDistance(pC, longlat=FALSE)
+#geoDist <- as.dist(geoDist)
 
-# Real data 
-names(gr1000)<-tolower(names(gr1000))
-nodes<-rbind(gr1000[,c("x","y")], gr200[,c("x","y")])
+#tr <- transition(gr0, mean, directions=8)
+#trC <- geoCorrection(tr, "c", scl=TRUE)
+#trR <- geoCorrection(tr, "r", scl=TRUE)
 
-# nearest neighbours
-near<-spdep::knearneigh(cbind(nodes$x,nodes$y), k=36, longlat = NULL, RANN=TRUE)
+#cosDist <- costDistance(trC, pC.atsea)
+#resDist <- commuteDistance(trR, pC.atsea)
+#cor(genDist,geoDist)
 
-# Calculate the links 
-links<-data.frame(start_id=rep(1:near$np,each=near$k),end_id=c(t(near$nn)))
-links$newcost<-sqrt((nodes$x[links$start_id]-nodes$x[links$end_id])^2 + (nodes$y[links$start_id]-nodes$y[links$end_id])^2)
-
-# Create network graph 
-g2 <- igraph::graph.data.frame(links, directed=FALSE)
-
-# Calculate shortest paths
-tmp3 <- igraph::shortest.paths(g2,v='2',weights=igraph::E(g2)$newcost)
-
-# Calculate kleur 
-kleur<-rainbow(101)[round(tmp3/max(tmp3)*100)+1]
-plot(nodes$x,nodes$y,col=kleur, asp=1)
-
-
-png('/Users/robvb/Desktop/ST_quickmap.png', res=150, units='in', width=7, height=7)
-stmap('NL')
-points(st[,XY], pch="+", cex=0.4)
-
-dev.off()
+#Europe <- raster(system.file("external/Europe.grd", package="gdistance"))
+#str(Europe)
+#image(Europe)
