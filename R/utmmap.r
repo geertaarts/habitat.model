@@ -42,10 +42,8 @@ utmmap <- function(study.area=NULL, incl.ncp=FALSE, ...) {
     }
   }
 
-  
-  par(mar=rep(1,4))
+  # plot the wicked map
   plot(coast, col='lightgrey', border='lightgrey', xlim=xlim, ylim=ylim, ...)
   if (incl.ncp==TRUE) { plot(ncp.utm, border='lightgrey', add=TRUE) }
   box()
-  par(mar=c(4,4,2,2))
 }
