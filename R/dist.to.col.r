@@ -5,10 +5,10 @@
 dist.to.col <- function(gr, # grid, as spatial object
                         site, # colony location, as spatial object
                         plot=FALSE) {
-  require(spdep)
-  require(sp)
-  require(igraph)
-  require(raster)
+  require(spdep, quietly = TRUE)
+  require(sp, quietly = TRUE)
+  require(igraph, quietly = TRUE)
+  require(raster, quietly = TRUE)
   
   # gr is grid of class spatialPoints ; this can have an irregular shape or holes
   # col is colony/haulout location: must be one location!
