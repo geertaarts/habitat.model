@@ -15,7 +15,12 @@ create.grid <- function(x, crop.shp=NULL, cut.shp=NULL, cellsize=1000) { # cells
     gr.out <- gr.out[!is.na(over(gr.out, crop.shp)[,1]),]
   }
   if (!is.null(cut.shp)) {
-    gr.out <- gr.out[is.na(over(gr.out, cut.shp)[,1]),]
+    gr.over <- over(gr.out, cut.shp)
+    if ( class(gr.over)=='integer' ) {
+      gr.out <- gr.out[is.na(gr.over)]
+    } else {
+      gr.out <- gr.out[is.na(gr.over[,1]),]
+    }
   }
   return(gr.out)
 }
