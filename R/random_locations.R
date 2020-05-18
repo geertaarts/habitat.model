@@ -17,6 +17,7 @@ random_locations <- function(trks, npoints=10, buf=10000, shp=NULL, crs) {
   # npoints = number of random points per original animal relocation
   # buf = the buffer (in meters) around the convex hull
   # shp = (list of) shapefile(s) of areas that should be EXCLUDED
+  # keep.time = logical indicating whether or not the same date/time labels as the original data should be included
   
   # libraries
   require(sp)
@@ -73,10 +74,13 @@ random_locations <- function(trks, npoints=10, buf=10000, shp=NULL, crs) {
       } else {
         mch3 <- rgeos::gDifference(mch2, shp)
       }
-    }
     
     # generate random points 
     mch.rp <- sp::spsample(mch3, n=npoints*nrow(trks.l[[indi]][,c('x','y')]), "random")
+    } else {
+      mch.rp <- sp::spsample(mch2, n=npoints*nrow(trks.l[[indi]][,c('x','y')]), "random")
+    }
+    
     
     # and put coordinates in list
     rp.list[[indi]] <- data.frame(coordinates(mch.rp))
