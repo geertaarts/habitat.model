@@ -2,14 +2,23 @@
 ### function to sample random points from the range of individuals
 ### + a buffer around it and - predefined areas (e.g. land)
 
-# now using 
+# work.dir <- "/home/rob/Documents/github/sandwich_tern/"
+# gis.dir <- '/home/rob/Documents/GISdata/'
+# git.dir <- '/home/rob/Documents/github/'
+# fig.dir <- paste0(work.dir, 'figures/')
+# dat.dir <- paste0(work.dir, 'data/')
+# sav.dir <- paste0(work.dir, 'data/')
+# big.dir <- paste0(git.dir,'bigdata/')
+# load(paste0(dat.dir, "deltares.rdata"), verbose=TRUE)
+# load(file=paste0(big.dir, "dataHMM_20200410.rdata"), verbose=TRUE)
+# 
 
-random_locations <- function(trks, npoints=10, buf=10000, shp=NULL, crs) {
+random_locations <- function(trks, npoints=10, excl=TRUE, buf=10000, shp=NULL, common.crs) {
   # trks <- st
   # npoints <- 10
   # buf = 10000
   # shp = coast
-  # crs = my.proj$UTM31
+  # common.crs = my.proj$UTM31
   
   # trks = tracks of several individuals or class trk: it should include a column either 
   #     id or ID that identifies individuals. Random points are selected from 
@@ -31,16 +40,17 @@ random_locations <- function(trks, npoints=10, buf=10000, shp=NULL, crs) {
   
   # ID stuff
   ID.column <- colnames(trks)[which(colnames(trks) %in% c('id', 'ID'))]
-  ID <- as.character(droplevels(trks[,ID.column]))
+  ID <- as.character(droplevels(factor(trks[,ID.column])))
   IDs <- unique(ID)
   IDl <- length(IDs)
   
   # check class
-  if (class(trks)[1]=='data.frame') {
-    trks[,ID.column] <- droplevels(trks[,ID.column])
+  if ('data.frame' %in% class(trks)) {
+    trks <- data.frame(trks)
+    trks[,ID.column] <- droplevels(factor(trks[,ID.column]))
     trks.l  <- split(trks, f=trks[,ID.column])
   }
-  if (class(trks)[1]=='tbl_df') {
+  if ('tbl_df' %in% class(trks)) {
     trks.l <- lapply(trks$dat_clean, function(d) {
       d <- data.frame(d)
       d <- rename.colums(x, 'x_', 'x')
@@ -58,8 +68,8 @@ random_locations <- function(trks, npoints=10, buf=10000, shp=NULL, crs) {
     # calculate convexx hull, as spatialpointsdataframe
     mch0 <- dismo::convHull(trks.l[[indi]][,c('x','y')])
     mch1 <- mch0@polygons
-    if ( is.na(proj4string(mch1)) & !is.null(crs) )  {
-      proj4string(mch1) <- CRS(crs)
+    if ( is.na(proj4string(mch1)) & !is.null(common.crs) )  {
+      proj4string(mch1) <- CRS(common.crs)
       } else { cat('Please provide a crs.\n') }
     
     # add buffer
@@ -69,10 +79,18 @@ random_locations <- function(trks, npoints=10, buf=10000, shp=NULL, crs) {
     if ( !is.null(shp) ) {
       if (is.list(shp)) {
         for (sh in 1:length(shp)) {
-          mch3 <- rgeos::gDifference(mch2, shp[[sh]])
+          if (excl[sh]) {
+            mch3 <- rgeos::gDifference(mch2, shp[[sh]])
+          } else {
+            mch3 <- rgeos::gIntersection(mch2, shp[[sh]])
+          }
         }
       } else {
-        mch3 <- rgeos::gDifference(mch2, shp)
+        if (excl) {
+          mch3 <- rgeos::gDifference(mch2, shp)
+        } else {
+          mch3 <- rgeos::gIntersection(mch2, shp)
+        }
       }
     
     # generate random points 
@@ -83,7 +101,7 @@ random_locations <- function(trks, npoints=10, buf=10000, shp=NULL, crs) {
     
     
     # and put coordinates in list
-    rp.list[[indi]] <- data.frame(coordinates(mch.rp))
+    rp.list[[indi]] <- data.frame(sp::coordinates(mch.rp))
   }
   message('...finished\n')
   # unlist the stuff
