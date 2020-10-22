@@ -12,6 +12,7 @@ calc.d.time <- function(dt) {
   }
   return(out)
 }
+
 # function: get distance between subsequent fixes
 calc.d.dist <- function(lat, lon) {
   ndt <- length(lat)
@@ -22,13 +23,29 @@ calc.d.dist <- function(lat, lon) {
   }
   return(out)
 }
+
 # function: colony departure
 col.dep <- function(in_range) {
-  c(paste0(as.numeric(in_range[1:(length(in_range)-1)]), as.numeric(in_range[2:(length(in_range))]))=="10", NA)
+  if (is.logical(in_range)) {
+    out <- c(paste0(as.numeric(in_range[1:(length(in_range)-1)]), as.numeric(in_range[2:(length(in_range))]))=="10", NA)
+  } 
+  if (is.numeric(in_range)) {  
+    out <- c(paste0(in_range[1:(length(in_range)-1)], in_range[2:(length(in_range))])=="10", NA)
+  }
+  return(out)
 }
+
+# function: colony arrival
 col.arr <- function(in_range) {
-  c(NA, paste0(as.numeric(in_range[1:(length(in_range)-1)]), as.numeric(in_range[2:(length(in_range))]))=="01")
+  if (is.logical(in_range)) {
+    out <- c(NA, paste0(as.numeric(in_range[1:(length(in_range)-1)]), as.numeric(in_range[2:(length(in_range))]))=="01")
+  } 
+  if (is.numeric(in_range)) {  
+    out <- c(NA, paste0(in_range[1:(length(in_range)-1)], in_range[2:(length(in_range))])=="01")
+  }
+  return(out)
 }
+
 # function: which time gaps are larger than a threshold value?
 dt.gap <- function(date_time, max.gap) { # max gap in minutes
   dt <- calc.d.time(date_time)
@@ -36,6 +53,7 @@ dt.gap <- function(date_time, max.gap) { # max gap in minutes
   t.gap <- dt > max.gap
   return(t.gap)
 }
+
 # function: create trip index: split track between colony departures
 trips.index <- function(dep, gap) {
   ri <- 1:length(dep)
@@ -44,16 +62,23 @@ trips.index <- function(dep, gap) {
   if ( br[1]!=1 ) {
     br <- c(1, br)
   }
+  if (br[1]==0) {
+    br <- br[-1]
+  }
+  br <- unique(br)
   ct <- cut(ri, breaks=br, include.lowest = TRUE, labels=1:(length(br)-1))
   return(ct)
 }
+
 # function: time since colony departure
 time.since.departure <- function(time, inrange) {
   coldep <- col.dep(inrange) # colony departure
-  if (first(coldep)==1) {
+  coldep[length(coldep)] <- FALSE
+  # includes departure
+  if ( any(coldep) ) {
     out <- as.vector(difftime(
       time1=time,
-      time2=time[1],
+      time2=first(time[coldep==TRUE]),
       units="mins"))
     out[inrange==1] <- 0
   } else {
@@ -61,6 +86,8 @@ time.since.departure <- function(time, inrange) {
   }
   return(out)
 }
+
+# function: assess whether the trip is complete (=starts and ends in colony) or otherwise
 completeness <- function(inrange) {
   cd <- any(col.dep(inrange), na.rm=TRUE) # departure
   ca <- any(col.arr(inrange), na.rm=TRUE) # arrival
