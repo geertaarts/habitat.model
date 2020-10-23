@@ -103,10 +103,12 @@ make.index.out <- function(v, val=0) {
   # v <- c(0,0,0,1,1,0,1,0,1,1,1,1,0,0,0,0,0,0,1,0,0,0,1,1,1,0,0,0,0,1)
   if (is.logical(v)) { v <- as.numeric(v) }
   if (is.logical(val)) { val <- as.numeric(val)}
-  h <- rle(v)
-  x <- rep(h$values, h$lengths)
-  y <- rep(1:length(h$values), h$length)
-  y[x!=val] <- NA
-  y[!is.na(y)] <- rep(1:length(h$values[h$values==val]), h$length[h$values==val])
+  if ( all(v!=val) ) { y <- rep(NA, length(v)) } else {
+    h <- rle(v)
+    x <- rep(h$values, h$lengths)
+    y <- rep(1:length(h$values), h$length)
+    y[x!=val] <- NA
+    y[!is.na(y)] <- rep(1:length(h$values[h$values==val]), h$length[h$values==val])
+  }
   return(y)
 }
