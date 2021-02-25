@@ -12,7 +12,11 @@ create.grid <- function(x, crop.shp=NULL, cut.shp=NULL, cellsize=1000) { # cells
   proj4string(gr.out) <- x@proj4string
   
   if (!is.null(crop.shp)) {
-    gr.out <- gr.out[!is.na(over(gr.out, crop.shp)[,1]),]
+    if ( length(crop.shp)==1 ) {
+      gr.out <- gr.out[!is.na(over(gr.out, crop.shp)),]
+    } else {
+      gr.out <- gr.out[!is.na(over(gr.out, crop.shp)[,1]),]
+    }
   }
   if (!is.null(cut.shp)) {
     gr.over <- over(gr.out, cut.shp)

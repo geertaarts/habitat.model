@@ -5,7 +5,7 @@
 get.HMM.plot.data <- function (x, animals = NULL, covs = NULL, ask = TRUE, breaks = "Sturges",                
                                hist.ylim = NULL, sepAnimals = FALSE, sepStates = FALSE,                             
                                col = NULL, cumul = TRUE, plotTracks = TRUE, plotCI = FALSE,                         
-                               alpha = 0.95, plotStationary = FALSE, ...)                                           
+                               alpha = 0.95, plotStationary = FALSE)                                           
 {   
   library(CircStats)
   m <- x                                                                               
@@ -703,7 +703,7 @@ get.HMM.plot.data <- function (x, animals = NULL, covs = NULL, ask = TRUE, break
 ## NEW PLOTHIST FUNCTION ####
 my.new.plotHist <- function (gen, genDensities, dist, message, sepStates, breaks = "Sturges", 
                              state = NULL, hist.ylim = NULL, col = NULL, legText, cumul = TRUE, 
-                             iStates, plot.legend=TRUE, ...) 
+                             iStates, plot.legend=TRUE, xlab, ...) 
 {
   # gen
   # genDensities
@@ -803,7 +803,7 @@ my.new.plotHist <- function (gen, genDensities, dist, message, sepStates, breaks
       }
     }
     do.call(hist, c(list(gen, prob = T, main = "", ylim = c(0, ymax), 
-                         xlab = paste0(distname, " (radians)"), col = "grey", 
+                         xlab = "turning angle (radians)", col = "grey", 
                          border = "white", breaks = breaks, xaxt = "n"), arg))
     do.call(axis, c(list(1, at = c(-pi, -pi/2, 0, pi/2, pi), 
                          labels = expression(-pi, -pi/2, 0, pi/2, pi)), arg))
@@ -857,7 +857,7 @@ my.new.plotHist <- function (gen, genDensities, dist, message, sepStates, breaks
       }
       do.call(hist, 
               c(list(gen, prob = T, main = "", ylim = c(ymin, ymax), 
-                     xlab = distname, col = "grey", border = "white", 
+                     xlab = "step size (m)", col = "grey", border = "white", 
                      breaks = breaks), arg))
       do.call(mtext, c(list(message, side = 3, outer = TRUE, 
                             padj = 2, cex = cex.main), marg))
@@ -869,8 +869,7 @@ my.new.plotHist <- function (gen, genDensities, dist, message, sepStates, breaks
                                  lwd = lwd)
         if (cumul) {
           total <- genDensities[[iStates[1]]]
-          for (s in iStates[-1]) total[, 2] <- total[, 
-                                                     2] + genDensities[[s]][, 2]
+          for (s in iStates[-1]) total[, 2] <- total[, 2] + genDensities[[s]][, 2]
           lines(total, lwd = lwd, lty = 2)
         }
         if (plot.legend==TRUE) {
@@ -1783,7 +1782,7 @@ my.plotHist <- function (gen, genDensities, dist, message, sepStates, breaks = "
       }
     }
     do.call(hist, c(list(gen, prob = T, main = "", ylim = c(0, 
-                                                            ymax), xlab = paste0(distname, " (radians)"), col = "grey", 
+                                                            ymax), xlab = "turning angle (radians)", col = "grey", 
                          border = "white", breaks = breaks, xaxt = "n"), arg))
     do.call(axis, c(list(1, at = c(-pi, -pi/2, 0, pi/2, pi), 
                          labels = expression(-pi, -pi/2, 0, pi/2, pi)), arg))
