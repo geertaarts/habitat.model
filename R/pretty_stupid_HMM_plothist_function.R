@@ -5,7 +5,7 @@
 get.HMM.plot.data <- function (x, animals = NULL, covs = NULL, ask = TRUE, breaks = "Sturges",                
                                hist.ylim = NULL, sepAnimals = FALSE, sepStates = FALSE,                             
                                col = NULL, cumul = TRUE, plotTracks = TRUE, plotCI = FALSE,                         
-                               alpha = 0.95, plotStationary = FALSE)                                           
+                               alpha = 0.95, plotStationary = FALSE, ...)                                           
 {   
   library(CircStats)
   m <- x                                                                               
@@ -242,37 +242,52 @@ get.HMM.plot.data <- function (x, animals = NULL, covs = NULL, ask = TRUE, break
     }                                                                                 
   }                                                                                     
   tmpInputs <- momentuHMM:::checkInputs(
-    nbStates, tmpConditions$dist, tmpPar,
-    tmpConditions$estAngleMean, tmpConditions$circularAngleMean,                      
-    tmpConditions$zeroInflation, tmpConditions$oneInflation,                          
-    tmpConditions$DM, tmpConditions$userBounds, tmpConditions$cons,                   
-    tmpConditions$workcons, stateNames)                                               
+    nbStates=nbStates, dist=tmpConditions$dist, Par=tmpPar,
+    estAngleMean=tmpConditions$estAngleMean, circularAngleMean=tmpConditions$circularAngleMean,                      
+    zeroInflation=tmpConditions$zeroInflation, oneInflation=tmpConditions$oneInflation,                          
+    DM=tmpConditions$DM, userBounds=tmpConditions$userBounds, stateNames=stateNames
+    #tmpConditions$cons,                   
+    #tmpConditions$workcons, 
+    )
+  # input required by checkInputs
+  # nbStates, dist, Par, estAngleMean, circularAngleMean, 
+  # zeroInflation, oneInflation, DM, userBounds, stateNames, 
+  # checkInflation = FALSE
   tmpp <- tmpInputs$p                                                                   
   splineInputs <- momentuHMM:::getSplineDM(distnames, tmpInputs$DM, m, covs)                         
-  covs <- splineInputs$covs                                                             
-  DMinputs <- momentuHMM:::getDM(covs, splineInputs$DM, tmpInputs$dist,                              
-                                 nbStates, tmpp$parNames, tmpp$bounds, tmpPar, tmpConditions$cons,                 
-                                 tmpConditions$workcons, tmpConditions$zeroInflation,                              
-                                 tmpConditions$oneInflation, tmpConditions$circularAngleMean)                      
+  covs <- splineInputs$covs                    
+  # input for getDM
+  # data, DM, dist, nbStates, parNames, bounds, Par, zeroInflation, 
+  # oneInflation, circularAngleMean, ParChecks = TRUE, wlag = FALSE
+  DMinputs <- momentuHMM:::getDM(data=covs, DM=splineInputs$DM, dist=tmpInputs$dist,                              
+                                 nbStates=nbStates, parNames=tmpp$parNames, 
+                                 bounds=tmpp$bounds, Par=tmpPar, zeroInflation=tmpConditions$zeroInflation,                              
+                                 oneInflation=tmpConditions$oneInflation, circularAngleMean=tmpConditions$circularAngleMean)                      
+  # removed: tmpConditions$cons, tmpConditions$workcons, 
   fullDM <- DMinputs$fullDM                                                             
-  DMind <- DMinputs$DMind                                                               
-  wpar <- momentuHMM:::n2w(tmpPar, tmpp$bounds, beta, delta, nbStates, tmpInputs$estAngleMean,       
-                           tmpInputs$DM, DMinputs$cons, DMinputs$workcons, tmpp$Bndind,                      
-                           tmpInputs$dist)                                                                   
+  DMind <- DMinputs$DMind   
+  #par, bounds, beta, delta = NULL, nbStates, estAngleMean, DM, Bndind, dist
+  wpar <- momentuHMM:::n2w(par=tmpPar, bounds=tmpp$bounds, beta=beta, delta=delta, nbStates=nbStates, 
+                           estAngleMean=tmpInputs$estAngleMean,       
+                           DM=tmpInputs$DM, Bndind=tmpp$Bndind,                      
+                           dist=tmpInputs$dist) # removed:DMinputs$cons, DMinputs$workcons,                                                                    
   ncmean <- momentuHMM:::get_ncmean(distnames, fullDM, tmpInputs$circularAngleMean, nbStates)                                                                         
   
   nc <- ncmean$nc
   meanind <- ncmean$meanind
-  par <- momentuHMM:::w2n(wpar, tmpp$bounds, tmpp$parSize, nbStates, nbCovs, 
-                          tmpInputs$estAngleMean, tmpInputs$circularAngleMean, 
-                          tmpInputs$consensus, stationary = m$conditions$stationary, 
-                          DMinputs$cons, fullDM, DMind, DMinputs$workcons, 1, tmpInputs$dist, 
+  #wpar, bounds, parSize, nbStates, nbCovs, estAngleMean, 
+  #circularAngleMean, consensus, stationary, fullDM, DMind, 
+  #nbObs, dist, Bndind, nc, meanind, covsDelta, workBounds, covsPi
+  par <- momentuHMM:::w2n(wpar=wpar, bounds=tmpp$bounds, parSize=tmpp$parSize, nbStates=nbStates, nbCovs=nbCovs, 
+                          estAngleMean=tmpInputs$estAngleMean, circularAngleMean=tmpInputs$circularAngleMean, 
+                          consensus=tmpInputs$consensus, stationary = m$conditions$stationary, 
+                          fullDM=fullDM, DMind,  1, tmpInputs$dist, # removed: DMinputs$cons, DMinputs$workcons,
                           tmpp$Bndind, nc, meanind, m$covsDelta, tmpConditions$workBounds, 
                           m$covsPi)
   inputs <- momentuHMM:::checkInputs(nbStates, m$conditions$dist, Par, m$conditions$estAngleMean, 
                                      m$conditions$circularAngleMean, m$conditions$zeroInflation, 
                                      m$conditions$oneInflation, m$conditions$DM, m$conditions$userBounds, 
-                                     m$conditions$cons, m$conditions$workcons, stateNames)
+                                      stateNames) #m$conditions$cons, m$conditions$workcons,
   p <- inputs$p
   Fun <- lapply(inputs$dist, function(x) paste("d", x, sep = ""))
   zeroMass <- oneMass <- vector("list", length(inputs$dist))
